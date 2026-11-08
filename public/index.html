@@ -17,7 +17,7 @@
 @media(prefers-color-scheme:dark){:root{--bg:#0F1613;--card:#18211D;--ink:#EAF0EC;--mute:#92A39A;--line:#2A3630;--pine:#3E9E7E;--in:#5CC795;--out:#F08A94;--cr:#B592E6;--db:#7DB1EE;--div:#E3B24A}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 var(--sans)}
-body{padding:env(safe-area-inset-top) 0 calc(150px + env(safe-area-inset-bottom))}
+body{padding:env(safe-area-inset-top) 0 calc(110px + env(safe-area-inset-bottom))}
 main{max-width:560px;margin:0 auto;padding:0 16px}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 button:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
@@ -59,9 +59,10 @@ button:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
 .bar{height:6px;border-radius:3px;background:var(--bg);margin-top:6px;overflow:hidden}.bar u{display:block;height:100%;background:var(--out);border-radius:3px}
 .tr.z .l{color:var(--mute);font-weight:400}
 .add{width:100%;padding:12px;border-radius:12px;border:1px dashed var(--line);color:var(--pine);font-weight:600;margin-top:4px}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:4;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
-.tabs button{flex:1;padding:14px 0;font-weight:600;color:var(--mute)}.tabs button.on{color:var(--pine)}
-.fab{position:fixed;right:max(20px,calc(50% - 260px));bottom:calc(72px + env(safe-area-inset-bottom));width:64px;height:64px;border-radius:50%;background:var(--pine);color:#fff;font-size:34px;box-shadow:0 6px 20px rgba(0,0,0,.28);z-index:4}
+.tabs{position:sticky;top:env(safe-area-inset-top);z-index:4;display:flex;gap:6px;background:var(--bg);padding:10px 0 6px}
+.tabs button{flex:1;min-height:44px;border-radius:12px;font-weight:600;font-size:15px;color:var(--mute);background:var(--card);border:1px solid var(--line)}
+.tabs button.on{background:var(--pine);border-color:var(--pine);color:#fff}
+.fab{position:fixed;right:max(20px,calc(50% - 260px));bottom:calc(22px + env(safe-area-inset-bottom));width:64px;height:64px;border-radius:50%;background:var(--pine);color:#fff;font-size:34px;box-shadow:0 6px 20px rgba(0,0,0,.28);z-index:4}
 .fab:active{transform:scale(.94)}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:5}
 .ov.on{opacity:1;pointer-events:auto}
@@ -115,8 +116,9 @@ html[data-t=grafite]{--pine:#66768A;--bg:#101214;--card:#1A1D20;--line:#2B3035}}
 .rs{font-size:13px;color:var(--mute);margin-bottom:2px}.rs.late{color:var(--out)}
 .ra{display:flex;gap:8px;margin-top:10px}.ra button{flex:1;min-height:44px;border-radius:10px;background:var(--bg);font-weight:600}
 .ra .ok{background:var(--pine);color:#fff}.ra button:disabled{opacity:.4}
-#rList .bar u{background:var(--div)}
-.toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:9;opacity:0;pointer-events:none;transition:.2s}
+button.rc{display:block;width:100%;text-align:left;padding:12px 14px}
+.rc .t{display:flex;justify-content:space-between;gap:8px;font-size:17px}
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:9;opacity:0;pointer-events:none;transition:.2s}
 .toast.on{opacity:1}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -124,6 +126,7 @@ html[data-t=grafite]{--pine:#66768A;--bg:#101214;--card:#1A1D20;--line:#2B3035}}
 <body>
 <main>
   <div class="file warn" id="file"><span id="fs"></span><button id="bOpen">Abrir</button><button id="bSave">Salvar</button></div>
+  <nav class="tabs"><button id="tL" class="on">Lançamentos</button><button id="tT">Por tag</button><button id="tR">Dividendos</button></nav>
   <div class="top">
     <h1 id="mes"></h1>
     <div class="nav"><button id="prev" aria-label="Mês anterior">‹</button><button id="next" aria-label="Próximo mês">›</button></div>
@@ -156,7 +159,6 @@ html[data-t=grafite]{--pine:#66768A;--bg:#101214;--card:#1A1D20;--line:#2B3035}}
   <div class="themes" id="themes" role="group" aria-label="Tema"></div>
 </main>
 
-<nav class="tabs"><button id="tL" class="on">Lançamentos</button><button id="tT">Por tag</button><button id="tR">A receber</button></nav>
 <button class="fab" id="add" aria-label="Adicionar">+</button>
 <div class="ov" id="ov"></div>
 <input type="file" id="inp" accept="application/json,.json" hidden>
@@ -307,7 +309,7 @@ function occ(y,m){
 /* ---------- telas ---------- */
 function render(){
   const y=cur.getFullYear(),m=cur.getMonth();
-  $('#mes').textContent=view==='R'?'A receber':view==='T'&&per==='ano'?String(y):view==='T'&&per==='tudo'?'Tudo':cur.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  $('#mes').textContent=view==='R'?'Dividendos':view==='T'&&per==='ano'?String(y):view==='T'&&per==='tudo'?'Tudo':cur.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
   $('#vLanc').hidden=view!=='L';$('#vTag').hidden=view!=='T';$('#vRec').hidden=view!=='R';
   $('#tL').classList.toggle('on',view==='L');$('#tT').classList.toggle('on',view==='T');$('#tR').classList.toggle('on',view==='R');
   $('.nav').style.visibility=view==='R'||(view==='T'&&per==='tudo')?'hidden':'visible';
@@ -315,30 +317,20 @@ function render(){
 }
 const fmtD=s=>s.split('-').reverse().join('/');
 function renderR(){
-  const hoje=iso(new Date());
-  const rows=D.tx.filter(t=>t.kind==='div').map(t=>{
-    const pg=Math.min(t.pagas||0,t.par),falta=(t.par-pg)*t.amount;let prox=null;
-    if(pg<t.par){const [sy,sm,sd]=t.date.split('-').map(Number),i=sm-1+pg,yy=sy+Math.floor(i/12),mm=i%12;prox=iso(new Date(yy,mm,Math.min(sd,new Date(yy,mm+1,0).getDate())))}
-    return {t,pg,falta,prox};
-  }).sort((a,b)=>(a.prox||'9').localeCompare(b.prox||'9'));
-  $('#rTot').textContent=brl(rows.reduce((x,r)=>x+r.falta,0));
-  $('#rList').innerHTML=rows.length?rows.map(r=>{
-    const t=r.t,q=r.pg>=t.par,atr=!q&&r.prox<hoje;
-    return '<div class="rc"><button class="rh" data-e="'+t.id+'"><b>'+esc(t.name)+'</b><span>'+brl(r.falta)+'</span></button><div class="rs'+(atr?' late':'')+'">'+r.pg+' de '+t.par+' recebidas · parcela '+brl(t.amount)+(q?' · quitado':' · próxima '+fmtD(r.prox)+(atr?' (atrasada)':''))+'</div><div class="bar"><u style="width:'+(r.pg/t.par*100)+'%"></u></div><div class="ra"><button data-d="'+t.id+'"'+(r.pg?'':' disabled')+'>Desfazer</button><button class="ok" data-r="'+t.id+'"'+(q?' disabled':'')+'>Recebi parcela</button></div></div>';
-  }).join(''):'<div class="empty">Nenhum dividendo ainda.<br>Toque em + para cadastrar quem te deve.</div>';
+  const rows=D.tx.filter(t=>t.kind==='div').sort((a,b)=>a.date.localeCompare(b.date));
+  $('#rTot').textContent=brl(rows.reduce((x,t)=>x+t.par*t.amount,0));
+  $('#rList').innerHTML=rows.length?rows.map(t=>'<button class="rc" data-e="'+t.id+'"><div class="t"><b>'+esc(t.name)+'</b><span>'+brl(t.par*t.amount)+'</span></div><div class="rs">'+t.par+(t.par>1?' parcelas':' parcela')+' de '+brl(t.amount)+' · 1ª em '+fmtD(t.date)+'</div></button>').join(''):'<div class="empty">Nenhum dividendo ainda.<br>Toque em + para cadastrar quem te deve.</div>';
 }
 $('#vRec').onclick=e=>{
-  let b;const f=id=>D.tx.find(x=>x.id===id);
-  if(b=e.target.closest('[data-r]')){const t=f(b.dataset.r);if(t){t.pagas=Math.min(t.par,(t.pagas||0)+1);changed()}}
-  else if(b=e.target.closest('[data-d]')){const t=f(b.dataset.d);if(t){t.pagas=Math.max(0,(t.pagas||0)-1);changed()}}
-  else if(b=e.target.closest('[data-e]')){const t=f(b.dataset.e);if(t)open(null,null,t)}
+  const b=e.target.closest('[data-e]');if(!b)return;
+  const t=D.tx.find(x=>x.id===b.dataset.e);if(t)open(null,null,t);
 };
 $('#recv').onclick=()=>{view='R';render()};
 function renderL(y,m){
   const all=occ(y,m),o=all.filter(x=>x.t.kind!=='div');let ent=0,sai=0;
   o.forEach(x=>x.sign>0?ent+=x.t.amount:sai+=x.t.amount);
   $('#ent').textContent=brl(ent);$('#sai').textContent=brl(sai);$('#saldo').textContent=brl(ent-sai);
-  const rv=all.filter(x=>x.t.kind==='div'&&x.k>(x.t.pagas||0)),rc=$('#recv');
+  const rv=all.filter(x=>x.t.kind==='div'&&x.k>0),rc=$('#recv');
   rc.hidden=!rv.length;rc.innerHTML='<span>A receber neste mês · <b>'+brl(rv.reduce((z,x)=>z+x.t.amount,0))+'</b></span><span>›</span>';
   const favs=D.tags.filter(t=>t.fav);
   $('#quick').innerHTML=favs.length?'<div class="quick">'+favs.map(t=>'<button class="chip q" data-q="'+t.id+'">+ '+esc(t.nome)+'</button>').join('')+'</div>':'<div class="hint">Marque ★ em "Por tag" para ter atalhos de gasto rápido aqui.</div>';
@@ -468,7 +460,7 @@ sh.onsubmit=e=>{
   const t={id:old?old.id:Date.now().toString(36),kind:k,name:n,amount:a,date:$('#date').value||iso(new Date())};
   if(k==='gasto'){t.tag=selTag;t.m=sh.elements.m.value;t.rec=$('#rec').checked;if(t.rec)t.par=parseInt($('#parG').value)||null}
   if(k==='receita')t.rec=$('#rec').checked;
-  if(k==='div'){t.par=Math.max(1,parseInt($('#par').value)||1);t.pagas=Math.min((old&&old.pagas)||0,t.par)}
+  if(k==='div'){t.par=Math.max(1,parseInt($('#par').value)||1)}
   if(old)D.tx[D.tx.indexOf(old)]=t;else D.tx.push(t);
   if(!old){const d=t.date.split('-').map(Number);cur=new Date(d[0],d[1]-1,1);view=k==='div'?'R':'L'}
   close();changed();toast(old?'Alterado':'Lançado');
