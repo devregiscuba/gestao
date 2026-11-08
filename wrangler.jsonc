@@ -4,6 +4,6 @@
   "compatibility_date": "2026-11-01",
   "assets": { "directory": "./public", "binding": "ASSETS" },
   "kv_namespaces": [
-    { "binding": "DADOS", "id": "COLE_AQUI_O_ID_DO_KV" }
+    { "binding": "DADOS", "id": "ce3c4601d4ca443d8d3f0cdd82d54c58" }
   ]
 }
