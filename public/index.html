@@ -154,7 +154,7 @@ button.rc{display:flex;justify-content:space-between;align-items:center;gap:12px
     <button class="add" id="newTag">+ Nova tag</button>
   </div>
   <div id="vRec" hidden>
-    <section class="sum" style="background:var(--div)"><small>Total a receber</small><div class="big" id="rTot"></div><small>Soma das parcelas · fora do saldo do mês</small></section>
+    <section class="sum" style="background:var(--div)"><small id="rLbl">Total a receber no mês</small><div class="big" id="rTot"></div><small>Soma das parcelas do mês · fora do saldo</small></section>
     <div id="rList"></div>
   </div>
 </main>
@@ -351,10 +351,11 @@ function renderR(){
   const now=new Date(),ny=now.getFullYear(),nm=now.getMonth();
   const rows=D.tx.filter(t=>t.kind==='div').sort((a,b)=>a.date.localeCompare(b.date)).map(t=>{
     const [sy,sm]=t.date.split('-').map(Number),diff=(ny-sy)*12+(nm+1-sm);
-    return {t,atual:Math.min(t.par,Math.max(0,diff+1)),ativo:diff<t.par};
+    return {t,atual:Math.min(t.par,Math.max(0,diff+1)),noMes:diff>=0&&diff<t.par};
   });
-  $('#rTot').textContent=brl(rows.filter(r=>r.ativo).reduce((x,r)=>x+r.t.amount,0));
-  $('#rList').innerHTML=rows.length?rows.map(r=>'<button class="rc'+(r.ativo?'':' z')+'" data-e="'+r.t.id+'"><span class="l"><b>'+esc(r.t.name)+'</b><span class="rs">'+r.atual+'/'+r.t.par+' · 1ª em '+fmtD(r.t.date)+'</span></span><span class="v">'+brl(r.t.amount)+'</span></button>').join(''):'<div class="empty">Nenhum dividendo ainda.<br>Toque em + para cadastrar quem te deve.</div>';
+  $('#rLbl').textContent='Total a receber em '+now.toLocaleDateString('pt-BR',{month:'long'});
+  $('#rTot').textContent=brl(rows.filter(r=>r.noMes).reduce((x,r)=>x+r.t.amount,0));
+  $('#rList').innerHTML=rows.length?rows.map(r=>'<button class="rc'+(r.noMes?'':' z')+'" data-e="'+r.t.id+'"><span class="l"><b>'+esc(r.t.name)+'</b><span class="rs">'+r.atual+'/'+r.t.par+' · 1ª em '+fmtD(r.t.date)+'</span></span><span class="v">'+brl(r.t.amount)+'</span></button>').join(''):'<div class="empty">Nenhum dividendo ainda.<br>Toque em + para cadastrar quem te deve.</div>';
 }
 $('#vRec').onclick=e=>{
   const b=e.target.closest('[data-e]');if(!b)return;
